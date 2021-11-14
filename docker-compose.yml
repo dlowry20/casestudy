@@ -8,6 +8,8 @@ services:
   case-study:
     image: lowry-casestudy/casestudy:latest
     container_name: case-study-app
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
     ports:
       - "8080:8080"
     depends_on:
