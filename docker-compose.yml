@@ -1,10 +1,14 @@
 version: '2'
 services:
-  case-study:
-    container_name: casestudy
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: case-study:latest
+  product-mongodb:
+    image: mongo:latest
+    container_name: product-pricing-db
     ports:
-      - 8080:8080
+      - "27017:27017"
+  case-study:
+    image: lowry-casestudy/casestudy:latest
+    container_name: case-study-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - product-mongodb
