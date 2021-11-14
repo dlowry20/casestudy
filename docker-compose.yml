@@ -1,0 +1,10 @@
+version: '2'
+services:
+  case-study:
+    container_name: casestudy
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: case-study:latest
+    ports:
+      - 8080:8080
