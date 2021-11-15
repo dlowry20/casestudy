@@ -6,9 +6,9 @@ import lombok.NoArgsConstructor;
 @lombok.Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Response {
+public class ResponseDTO {
 
-    public Data data;
+    public DataDTO data;
 
     public String getProductTitle() {
         return this.getData().getProduct().getItem().getProduct_description().getTitle();

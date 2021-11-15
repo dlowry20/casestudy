@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 @lombok.Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductDescription {
+public class ProductDescriptionDTO {
 
     private String title;
     private String downstream_description;

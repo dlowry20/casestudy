@@ -1,5 +1,6 @@
 package com.lowry.target.casestudy.persistence;
 
+import com.lowry.target.casestudy.data.response.ProductResponse;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;

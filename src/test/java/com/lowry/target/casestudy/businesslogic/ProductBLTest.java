@@ -2,6 +2,7 @@ package com.lowry.target.casestudy.businesslogic;
 
 import com.lowry.target.casestudy.businesslogic.impl.ProductBLImpl;
 import com.lowry.target.casestudy.dataaccess.ProductRepository;
+import com.lowry.target.casestudy.dataaccess.ReactiveProductRepository;
 import com.lowry.target.casestudy.persistence.ProductEntity;
 import org.junit.Test;
 
@@ -12,7 +13,8 @@ import static org.mockito.Mockito.when;
 public class ProductBLTest {
 
     ProductRepository productRepository = mock(ProductRepository.class);
-    ProductBL productBL = new ProductBLImpl(productRepository);
+    ReactiveProductRepository reactiveProductRepository = mock(ReactiveProductRepository.class);
+    ProductBL productBL = new ProductBLImpl(productRepository, reactiveProductRepository);
 
     @Test
     public void testRead() {
