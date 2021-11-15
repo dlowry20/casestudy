@@ -5,10 +5,14 @@ import com.lowry.target.casestudy.persistence.ProductEntity;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
 
+@EnableReactiveMongoRepositories(basePackageClasses = ProductRepository.class)
 @Configuration
 public class AppStartupConfiguration {
 
@@ -22,8 +26,10 @@ public class AppStartupConfiguration {
 
         );
         return args -> {
-            productRepository.deleteAll();
-            productRepository.saveAll(productEntities);
+
+            productRepository.deleteAll().block();
+            productEntities.forEach(productEntity -> productRepository.save(productEntity).block());
+            System.out.println("ADDING RECORDS");
         };
     }
 }

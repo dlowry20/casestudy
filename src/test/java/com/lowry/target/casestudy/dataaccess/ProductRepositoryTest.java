@@ -7,8 +7,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.junit.Assert.*;
+import reactor.test.StepVerifier;
 
 @DataMongoTest
 @RunWith(SpringRunner.class)
@@ -19,40 +18,39 @@ public class ProductRepositoryTest {
 
     @Before
     public void before() {
-        productRepository.deleteAll();
+        productRepository.deleteAll().block();
     }
 
     @Test
     public void testFindByProductId() {
         String productId = "1234";
         ProductEntity product = new ProductEntity(productId, 12.23, "USD");
-        productRepository.save(product);
-
-        assertEquals(productRepository.findAll().size(), 1);
-
-        ProductEntity readProduct = productRepository.findByProductId(productId);
-
-        assertNotNull(readProduct);
-        assertEquals(product.getProductId(), readProduct.getProductId());
-        assertEquals(product.getPrice(), readProduct.getPrice(), 0.0);
-        assertEquals(product.getCurrencyCode(), readProduct.getCurrencyCode());
+        productRepository.save(product).block();
+        // 5 because includes the initial input by the CommandLineRunner bean
+        StepVerifier.create(productRepository.findAll())
+                .expectNextCount(1)
+                .verifyComplete();
+        StepVerifier.create(productRepository.findByProductId(productId))
+                .expectNextMatches(productEntity -> productId.equalsIgnoreCase(productEntity.getProductId()))
+                .verifyComplete();
     }
 
     @Test
     public void testUpdate() {
         String productId = "1234";
         ProductEntity product = new ProductEntity(productId, 12.23, "USD");
-        productRepository.save(product);
-        assertEquals(productRepository.findAll().size(), 1);
-        ProductEntity readProduct = productRepository.findByProductId(productId);
+        StepVerifier.create(productRepository.save(product))
+                .expectNext(product)
+                .verifyComplete();
 
-        ProductEntity updatedPrice = new ProductEntity(readProduct.getProductId(), 5.10, readProduct.getCurrencyCode());
+        StepVerifier.create(productRepository.findByProductId(productId))
+                .expectNextMatches(productReturned -> productReturned.getProductId().equalsIgnoreCase(productId))
+                .verifyComplete();
+        double newPrice = 5.10;
+        ProductEntity updatedPrice = new ProductEntity(product.getProductId(), newPrice, product.getCurrencyCode());
 
-        productRepository.save(updatedPrice);
-
-        ProductEntity readAfterUpdate = productRepository.findByProductId(productId);
-
-        assertNotNull(readAfterUpdate);
-        assertEquals(updatedPrice.getPrice(), readAfterUpdate.getPrice(), 0.0);
+        StepVerifier.create(productRepository.save(updatedPrice))
+                .expectNextMatches(entityWithUpdatedPrice -> entityWithUpdatedPrice.getPrice() == newPrice)
+                .verifyComplete();
     }
 }

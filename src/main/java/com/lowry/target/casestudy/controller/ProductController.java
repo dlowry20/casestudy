@@ -5,7 +5,6 @@ import com.lowry.target.casestudy.config.WebConfiguration;
 import com.lowry.target.casestudy.data.ResponseDTO;
 import com.lowry.target.casestudy.data.response.ProductPrice;
 import com.lowry.target.casestudy.data.response.ProductResponse;
-import com.lowry.target.casestudy.errorhandling.ProductNotFoundException;
 import com.lowry.target.casestudy.persistence.ProductEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
@@ -14,8 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
@@ -47,27 +44,17 @@ public class ProductController {
     }
 
     @PostMapping("/products/{id}")
-    public ResponseEntity<ProductResponse> updateProductCostById(@RequestBody ProductResponse productUpdatedPrice, @PathVariable String id) {
+    public ResponseEntity<Mono<ProductResponse>> updateProductCostById(@RequestBody ProductResponse productUpdatedPrice, @PathVariable String id) {
         validateInput(id);
-        ProductEntity productEntity = getProduct(id);
-        productEntity.setPrice(productUpdatedPrice.getCurrent_price().getValue());
-        productBL.updateProductCostByProductId(productEntity);
-        return new ResponseEntity<>(productUpdatedPrice, HttpStatus.OK);
+        return new ResponseEntity<>(
+                productBL.updateProductCostByProductId(id, productUpdatedPrice.getCurrent_price().getValue(), productUpdatedPrice.getCurrent_price().getCurrency_code())
+                        .map(entity -> new ProductResponse(
+                                entity.getProductId(),
+                                productUpdatedPrice.getName(),
+                                new ProductPrice(entity.getPrice(), entity.getCurrencyCode())))
+                        .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product does not exist in local DB."))),
+                HttpStatus.OK);
     }
-
-//    @PostMapping("/products-async/{id}")
-//    public ResponseEntity<Mono<ProductResponse>> updateProductCostByIdAsync(@RequestBody ProductResponse productUpdatedPrice, @PathVariable String id) {
-//        validateInput(id);
-//        Mono<ProductResponse> productResponseMono = getProductAsync(id)
-//                .flatMap(entity -> productBL.updateProductCostByProductId_async(new ProductEntity(id, productUpdatedPrice.getCurrent_price().getValue(), productUpdatedPrice.getCurrent_price().getCurrency_code())));
-//        return new ResponseEntity<Mono<ProductResponse>>((Mono.just(id)
-//                .flatMap(this::getProductAsync)
-//                .flatMap(entity -> productBL.updateProductCostByProductId_async(
-//                        new ProductEntity(id, productUpdatedPrice.getCurrent_price().getValue(), productUpdatedPrice.getCurrent_price().getCurrency_code()))
-//                )
-//                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product does not exist in local DB.")))));
-//
-//    }
 
     private Mono<ResponseDTO> getResponseMono(String id) {
         return webClient.get()
@@ -79,15 +66,7 @@ public class ProductController {
     }
 
     private Mono<ProductEntity> getProductAsync(String productId) {
-        return productBL.getProductByProductId_Async(productId);
-    }
-
-    private ProductEntity getProduct(String productId) {
         return productBL.getProductByProductId(productId);
-    }
-
-    private void doesNotExist() {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product does not exist.");
     }
 
     private ProductResponse buildProductResponse(ProductEntity product, ResponseDTO responseDTO) {

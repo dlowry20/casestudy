@@ -5,10 +5,7 @@ import reactor.core.publisher.Mono;
 
 public interface ProductBL {
 
-    ProductEntity getProductByProductId(String productId);
+    Mono<ProductEntity> getProductByProductId(String productId);
 
-    Mono<ProductEntity> getProductByProductId_Async(String productId);
-
-    ProductEntity updateProductCostByProductId(ProductEntity productEntity);
-    Mono<ProductEntity> updateProductCostByProductId_async(ProductEntity productEntity);
+    Mono<ProductEntity> updateProductCostByProductId(String productId, double newPrice, String newCurrencyCode);
 }

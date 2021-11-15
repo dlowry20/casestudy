@@ -15,12 +15,17 @@ public class ProductEntity {
 
     @Setter
     private double price;
+    @Setter
     private String currencyCode;
 
     public ProductEntity(String productId, double price, String currencyCode) {
         this.productId = productId;
         this.price = price;
         this.currencyCode = currencyCode;
+    }
+
+    public ProductEntity updatePrice(ProductEntity productEntity, double price, String currencyCode) {
+        return new ProductEntity(productEntity.getProductId(), price, currencyCode);
     }
 
 }

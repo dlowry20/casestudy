@@ -1,9 +1,10 @@
 package com.lowry.target.casestudy.dataaccess;
 
 import com.lowry.target.casestudy.persistence.ProductEntity;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import reactor.core.publisher.Mono;
 
-public interface ProductRepository extends MongoRepository<ProductEntity, String> {
+public interface ProductRepository extends ReactiveMongoRepository<ProductEntity, String> {
 
-    ProductEntity findByProductId(String productId);
+    Mono<ProductEntity> findByProductId(String productId);
 }

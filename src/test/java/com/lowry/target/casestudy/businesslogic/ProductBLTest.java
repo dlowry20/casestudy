@@ -2,42 +2,42 @@ package com.lowry.target.casestudy.businesslogic;
 
 import com.lowry.target.casestudy.businesslogic.impl.ProductBLImpl;
 import com.lowry.target.casestudy.dataaccess.ProductRepository;
-import com.lowry.target.casestudy.dataaccess.ReactiveProductRepository;
 import com.lowry.target.casestudy.persistence.ProductEntity;
 import org.junit.Test;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class ProductBLTest {
 
     ProductRepository productRepository = mock(ProductRepository.class);
-    ReactiveProductRepository reactiveProductRepository = mock(ReactiveProductRepository.class);
-    ProductBL productBL = new ProductBLImpl(productRepository, reactiveProductRepository);
+    ProductBL productBL = new ProductBLImpl(productRepository);
 
     @Test
     public void testRead() {
         String productID = "123";
         ProductEntity testProductEntity = new ProductEntity(productID, 12.12, "USD");
-        when(productRepository.findByProductId(productID)).thenReturn(testProductEntity);
-        ProductEntity returnedProductEntity = productBL.getProductByProductId(productID);
+        when(productRepository.findByProductId(productID)).thenReturn(Mono.just(testProductEntity));
+        Mono<ProductEntity> returnedProductEntity = productBL.getProductByProductId(productID);
 
-        assertEquals(returnedProductEntity.getProductId(), productID);
-        assertEquals(returnedProductEntity.getCurrencyCode(), testProductEntity.getCurrencyCode());
-        assertEquals(returnedProductEntity.getPrice(), testProductEntity.getPrice(), 0.0);
+        StepVerifier.create(returnedProductEntity)
+                        .expectNext(testProductEntity)
+                        .verifyComplete();
     }
 
     @Test
     public void testUpdate() {
         String productID = "123";
         ProductEntity testProductEntity = new ProductEntity(productID, 12.12, "USD");
-        when(productRepository.save(testProductEntity)).thenReturn(testProductEntity);
-        ProductEntity returnedProductEntity = productBL.updateProductCostByProductId(testProductEntity);
+        when(productRepository.save(testProductEntity)).thenReturn(Mono.just(testProductEntity));
+        when(productRepository.findByProductId(productID)).thenReturn(Mono.just(testProductEntity));
+        Mono<ProductEntity> returnedProductMono = productBL.updateProductCostByProductId(testProductEntity.getProductId(),
+                testProductEntity.getPrice(), testProductEntity.getCurrencyCode());
 
-        assertEquals(returnedProductEntity.getProductId(), productID);
-        assertEquals(returnedProductEntity.getCurrencyCode(), testProductEntity.getCurrencyCode());
-        assertEquals(returnedProductEntity.getPrice(), testProductEntity.getPrice(), 0.0);
+        StepVerifier.create(returnedProductMono)
+                .expectNext(testProductEntity)
+                .verifyComplete();
     }
-
 }
