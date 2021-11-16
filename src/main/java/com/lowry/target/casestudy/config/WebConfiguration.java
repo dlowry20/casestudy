@@ -1,5 +1,6 @@
 package com.lowry.target.casestudy.config;
 
+import com.lowry.target.casestudy.constants.WebConstants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -16,7 +17,7 @@ public class WebConfiguration {
     @Bean
     public WebClient webClient() {
         return WebClient.builder()
-                .baseUrl("https://redsky-uat.perf.target.com/redsky_aggregations/v1/redsky/case_study_v1?key=3yUxt7WltYG7MFKPp7uyELi1K40ad2ys")
+                .baseUrl(WebConstants.EXTERNAL_API_BASE_URL)
                 .build();
     }
 

@@ -7,6 +7,8 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -25,6 +27,15 @@ public class ProductBLTest {
         StepVerifier.create(returnedProductEntity)
                         .expectNext(testProductEntity)
                         .verifyComplete();
+    }
+
+    @Test
+    public void badInput() {
+        String productID = "";
+
+        Exception ex = assertThrows(RuntimeException.class, () -> productBL.getProductByProductId(productID));
+        String expectedError = "Product ID must not be null or blank";
+        assertTrue(ex.getMessage().contains(expectedError));
     }
 
     @Test

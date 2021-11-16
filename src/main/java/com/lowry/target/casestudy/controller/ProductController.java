@@ -36,7 +36,7 @@ public class ProductController {
     public ResponseEntity<Mono<ProductResponse>> getProductInformationByID(@PathVariable String id) {
         validateInput(id);
         Mono<ProductResponse> productResponse = Mono.zip(
-                getProductAsync(id).switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product does not exist in local DB."))),
+                getProductMono(id).switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product does not exist in local DB."))),
                 getResponseMono(id).switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product does not exist in Remote API."))),
                 this::buildProductResponse
         );
@@ -56,7 +56,7 @@ public class ProductController {
                 HttpStatus.OK);
     }
 
-    private Mono<ResponseDTO> getResponseMono(String id) {
+    public Mono<ResponseDTO> getResponseMono(String id) {
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder.queryParam("tcin",id).build())
                 .retrieve()
@@ -65,7 +65,7 @@ public class ProductController {
                 .retryWhen(Retry.fixedDelay(2, Duration.ofMillis(100)));
     }
 
-    private Mono<ProductEntity> getProductAsync(String productId) {
+    private Mono<ProductEntity> getProductMono(String productId) {
         return productBL.getProductByProductId(productId);
     }
 
