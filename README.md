@@ -1,16 +1,19 @@
 Dave Lowry - Target Interview Case Study
 
 
-There are two ways to run this application - one with docker and one without.
+There are three ways to run this application - docker, via the jar, via IDE.
 
-Docker:
+Docker - Run from Project Root
 1. _./mvnw clean; ./mvnw install -P docker_
 2. _docker-compose up_
 
-Non-Docker Through IDE
+Non-Docker Through IDE - From Project Root
 1. _./mvnw clean; ./mvnw install_
 2. Run CasestudyApplication.java
 
+Non-Docker Through Command line - From Project Root
+1. _./mvnw clean; ./mvnw install_
+2. _ java -jar target/casestudy-0.0.1-SNAPSHOT.jar
 
 Regardless of how you start the app you can utilize SwaggerUI to test the endpoints
 http://localhost:8080/swagger-ui/#/
